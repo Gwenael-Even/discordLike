@@ -1,0 +1,44 @@
+version: "2"
+services:
+    client:
+        build: ./client
+        container_name: client
+        image: node:alpine
+        restart: always
+        ports:
+            - "3000:3000"
+        working_dir: /client/src/app
+        volumes:
+            - ./client:/client/src/app
+        links:
+        - server
+        networks:
+        - webappnetwork
+    server:
+        build: ./server
+        container_name: server-api
+        restart: always
+        ports:
+            - "8081:3000"
+        volumes:
+            - ./server:/server
+            - /server/node_modules
+        depends_on: 
+            - mongodb
+        networks:
+            - webappnetwork
+    mongodb:
+        image: mongo
+        container_name: mongodb
+        restart: always
+        volumes:
+            - ./data-node:/data/db
+        ports:
+            - 27017:27017
+        command: mongod --noauth
+        networks:
+            - webappnetwork
+
+networks:
+    webappnetwork:
+        driver: bridge
